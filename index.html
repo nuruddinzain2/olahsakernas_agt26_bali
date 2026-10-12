@@ -37,7 +37,7 @@ th{background:var(--accbg)}
 <div class="wrap">
 
 <h1>Panduan Mengolah Data Sakernas dengan Python</h1>
-<p class="lead">Tiga langkah persiapan sekali saja: pasang Python, pasang pustaka, unduh skrip. Setelah itu, data SPSS Anda menjadi tabel Excel dengan satu kali jalan.</p>
+<p class="lead">Persiapan sekali saja: pasang Python, pasang pustaka, unduh dua skrip. Setelah itu dua langkah rutin: <b>imputasi</b> (memasukkan hasil konfirmasi lapangan ke data) lalu <b>olah</b> (menghasilkan tabel Excel).</p>
 
 <h2>1. Pasang Python</h2>
 <ol>
@@ -49,33 +49,62 @@ th{background:var(--accbg)}
 
 <h2>2. Pasang pustaka</h2>
 <p>Tekan tombol <b>Windows</b>, ketik <code>cmd</code>, tekan Enter. Di jendela hitam yang terbuka, jalankan:</p>
-<pre><code>pip install pandas pyreadstat xlsxwriter</code></pre>
-<p>Tunggu sampai muncul <i>Successfully installed</i>. Kalau muncul <i>'pip' is not recognized</i>, pakai <code>python -m pip install pandas pyreadstat xlsxwriter</code>.</p>
+<pre><code>pip install pandas pyreadstat xlsxwriter openpyxl</code></pre>
+<p>Tunggu sampai muncul <i>Successfully installed</i>. Kalau muncul <i>'pip' is not recognized</i>, pakai <code>python -m pip install pandas pyreadstat xlsxwriter openpyxl</code>.</p>
 
 <h2>3. Unduh skrip</h2>
-<p><a class="btn" href="olah_sakernas.py" download="olah_sakernas.py">Unduh olah_sakernas.py</a></p>
-<p>Simpan di folder kerja yang sama dengan file data <code>.sav</code> (file data dikirim oleh pengelola).</p>
-<div class="note"><p>Kalau tombol tidak mengunduh: klik kanan <a href="olah_sakernas.py">tautan ini</a>, pilih <b>Save link as</b>, dan pastikan nama file berakhiran <code>.py</code>, bukan <code>.txt</code>.</p></div>
+<p><a class="btn" href="imputasi_sakernas.py" download="imputasi_sakernas.py">Unduh imputasi_sakernas.py</a>
+<a class="btn" href="olah_sakernas.py" download="olah_sakernas.py">Unduh olah_sakernas.py</a></p>
+<p>Simpan keduanya di folder kerja yang sama dengan file data <code>.sav</code> (file data dikirim oleh pengelola). Susunan foldernya:</p>
+<pre><code>D:\FOLDER KERJA\
+   Data Awal_51.sav          (data awal)
+   imputasi_sakernas.py
+   olah_sakernas.py
+   Konfirmasi\               (folder: taruh Excel konfirmasi di sini)</code></pre>
+<div class="note"><p>Kalau tombol tidak mengunduh: klik kanan <a href="imputasi_sakernas.py">tautan ini</a> atau <a href="olah_sakernas.py">tautan ini</a>, pilih <b>Save link as</b>, dan pastikan nama file berakhiran <code>.py</code>, bukan <code>.txt</code>.</p></div>
 
-<h2>4. Cara kerja</h2>
-<p>Skrip membaca file <code>.sav</code> langsung, menghitung semua angka dengan penimbang, lalu menulis dua file hasil di folder yang sama. File <code>.sav</code> asli tidak berubah.</p>
+<h2>4. Imputasi: masukkan hasil konfirmasi lapangan</h2>
+<p>Skrip ini membaca <code>Data Awal_51.sav</code> (tidak diubah) dan semua file Excel di folder <code>Konfirmasi</code>. Responden yang dikonfirmasi <b>Bekerja</b> diisi data pekerjaannya (status, KBLI, KBJI, jam kerja, penghasilan), lalu disimpan sebagai data baru. Excel konfirmasi baru kapan saja boleh ditambahkan ke folder itu.</p>
 
-<p><b>a. Atur lokasi file.</b> Buka <code>olah_sakernas.py</code> dengan Notepad (klik kanan, <b>Open with</b>, <b>Notepad</b>). Di bagian <code>PENGATURAN</code>, ubah tiga baris ini sesuai folder dan nama file Anda, lalu simpan (Ctrl + S):</p>
-<pre><code>SAV_PATH = r"D:\FOLDER KERJA\Data Awal_51.sav"
+<p><b>a. Atur lokasi file.</b> Buka <code>imputasi_sakernas.py</code> dengan Notepad (klik kanan, <b>Open with</b>, <b>Notepad</b>). Di bagian <code>PENGATURAN</code>, ubah empat baris ini, lalu simpan (Ctrl + S):</p>
+<pre><code>SAV_AWAL          = r"D:\FOLDER KERJA\Data Awal_51.sav"
+FOLDER_KONFIRMASI = r"D:\FOLDER KERJA\Konfirmasi"
+OUT_SAV           = r"D:\FOLDER KERJA\Data Awal_51_imputasi.sav"
+OUT_LOG           = r"D:\FOLDER KERJA\Log_Imputasi.xlsx"</code></pre>
+<p>Jangan hapus huruf <code>r</code> dan tanda kutipnya. Tip: tahan <b>Shift</b>, klik kanan file, pilih <b>Copy as path</b>.</p>
+
+<p><b>b. Jalankan.</b> Klik dua kali <code>imputasi_sakernas.py</code>. Berhasil bila muncul ringkasan dan tulisan <i>Selesai</i>.</p>
+
+<p><b>c. Periksa <code>Log_Imputasi.xlsx</code>.</b></p>
+<div class="scroll"><table>
+<tr><th>Sheet</th><th>Gunanya</th></tr>
+<tr><td>Ringkasan</td><td>Jumlah yang diterapkan, dilewati, dan belum lengkap.</td></tr>
+<tr><td>Perubahan</td><td>Setiap perubahan: nilai lama dan nilai baru per responden.</td></tr>
+<tr><td>Tidak_lengkap</td><td>Dikonfirmasi bekerja tetapi KBLI, status, atau jam kerja kosong. Perlu dikejar ke lapangan.</td></tr>
+<tr><td>Status_tdk_sesuai</td><td>Status di Excel berbeda dengan hasil hitung (misalnya pekerja bebas pertanian tetapi KBLI non-pertanian).</td></tr>
+<tr><td>Kode_status</td><td>Kode status yang dipakai, dipelajari dari responden yang sudah bekerja di data. Pastikan masuk akal.</td></tr>
+<tr><td>Tidak_ketemu, Tidak_cocok</td><td>Baris Excel yang tidak ada di data, atau identitasnya tidak cocok (dilewati).</td></tr>
+</table></div>
+<p>Data baru juga memuat variabel <code>flag_imputasi</code> (1 = baris diubah berdasarkan konfirmasi).</p>
+
+<h2>5. Olah: hasilkan tabel Excel</h2>
+<p>Skrip ini membaca data hasil imputasi, menghitung semua angka dengan penimbang, lalu menulis dua file hasil.</p>
+
+<p><b>a. Atur lokasi file.</b> Buka <code>olah_sakernas.py</code> dengan Notepad. Di bagian <code>PENGATURAN</code>, ubah tiga baris ini sesuai folder Anda, lalu simpan:</p>
+<pre><code>SAV_PATH = r"D:\FOLDER KERJA\Data Awal_51_imputasi.sav"
 OUT_XLSX = r"D:\FOLDER KERJA\Hasil_Sakernas.xlsx"
 OUT_SAV  = r"D:\FOLDER KERJA\Data Awal 51_usia15plus.sav"</code></pre>
-<p>Jangan hapus huruf <code>r</code> dan tanda kutipnya. Tips: tahan <b>Shift</b>, klik kanan file, pilih <b>Copy as path</b>.</p>
 
-<p><b>b. Jalankan.</b> Klik dua kali <code>olah_sakernas.py</code>. Jendela hitam menampilkan prosesnya dan berhenti dengan tulisan <i>Tekan Enter untuk menutup jendela ini</i>. Berhasil bila ada baris <code>Selesai -&gt; ...Hasil_Sakernas.xlsx</code>.</p>
+<p><b>b. Jalankan.</b> Klik dua kali <code>olah_sakernas.py</code>. Jendela hitam berhenti dengan tulisan <i>Tekan Enter untuk menutup jendela ini</i>. Berhasil bila ada baris <code>Selesai -&gt; ...Hasil_Sakernas.xlsx</code>.</p>
 
 <p><b>c. Buka hasilnya.</b></p>
 <div class="scroll"><table>
 <tr><th>File</th><th>Isi</th></tr>
-<tr><td><code>Hasil_Sakernas.xlsx</code></td><td>Sheet <b>TPT_TPAK</b>, <b>Status_Pekerjaan</b>, <b>Lapangan_Usaha</b>, <b>Upah</b>, <b>Cek_Upah</b>. Dirinci menurut total, jenis kelamin, kota/desa, kabupaten/kota, dan kabupaten/kota menurut kota/desa.</td></tr>
+<tr><td><code>Hasil_Sakernas.xlsx</code></td><td>Sheet <b>TPT_TPAK</b>, <b>Perbandingan_2025_2026</b>, <b>Status_Pekerjaan</b>, <b>Lapangan_Usaha</b>, <b>Upah</b>, <b>Cek_Upah</b>. Dirinci menurut total, jenis kelamin, kota/desa, kabupaten/kota, dan kabupaten/kota menurut kota/desa.</td></tr>
 <tr><td><code>Data Awal 51_usia15plus.sav</code></td><td>Data SPSS baru, hanya usia 15+, dengan variabel tambahan <code>JenisKegiatan_imputasi</code>, <code>AK3</code>, <code>AKBAK</code>, <code>status_pekerjaan</code>, <code>kategori172025</code>, <code>upah_gaji</code>, <code>laba_usaha</code>.</td></tr>
 </table></div>
 
-<div class="warn"><p>Setiap kali dijalankan, kedua file hasil <b>ditimpa</b>. Tutup file Excel/SPSS hasil sebelum menjalankan ulang, dan salin dulu hasil yang ingin disimpan.</p></div>
+<div class="warn"><p>Urutan rutinnya selalu <b>imputasi dulu, baru olah</b>. Setiap ada Excel konfirmasi baru, jalankan keduanya lagi. File hasil <b>ditimpa</b> setiap kali dijalankan: tutup file Excel/SPSS hasil sebelum menjalankan ulang, dan salin dulu hasil yang ingin disimpan.</p></div>
 <p>Kalau muncul tulisan <b>[GAGAL]</b>, bacalah pesannya: skrip menyebut penyebab dan cara memperbaikinya. Bila belum jelas, kirim pesan itu ke pengelola.</p>
 
 </div>
